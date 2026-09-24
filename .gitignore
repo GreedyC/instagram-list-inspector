@@ -1,0 +1,7 @@
+.DS_Store
+*.log
+*.jsonl
+reports/
+snapshots/
+data/
+__pycache__/
