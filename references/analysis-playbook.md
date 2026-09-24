@@ -32,6 +32,18 @@ Keep one record per source list. Use this shape for working data and any user-re
 
 An Instagram count may change during collection or omit unavailable accounts. Even `end_and_count_match` is evidence for this capture, not a guarantee of a timeless complete list. Record whether a total came from the profile, post, or JSON response. Deduplicate by stable platform ID; if unavailable, normalize handles case-insensitively and mark matches `handle_only_uncertain`. Never infer a deleted account or a person's identity from a missing/renamed handle.
 
+### Count reconciliation
+
+Pagination exhaustion does not always reconcile with the profile's displayed count. A list can end with fewer distinct IDs because of overlapping pages, unavailable accounts, changing membership, or a platform response that omits entries; do not assume which cause applies.
+
+When `has_more` is false (or the cursor ends) but distinct IDs are below a credible displayed/response total:
+
+1. Record the mismatch and keep coverage as `partial`. Check whether the request, response, or page sequence explicitly signals a limit, hidden entries, errors, duplicate IDs, or a changing total. Do not infer that the unobserved accounts are a particular person.
+2. If the session is healthy and the observed GET already has a page-size parameter, at most **one** additional, sequential consistency pass may use a moderate larger page size accepted by the same endpoint. Keep the same origin, current signed-in tab, normal pacing, and stop conditions. Do not use repeated passes to force a count match, parallelize requests, or work around a limit/challenge. If there is no observed page-size parameter, do not invent an endpoint or parameter.
+3. Union the two passes by stable ID, keep the current handle from the later capture, and record both passes' page counts and end evidence. A second pass may find additional IDs without explaining the discrepancy. Mark `end_and_count_match` only when an explicit end signal and distinct-ID count genuinely match a credible total; otherwise retain `partial` and report `observed / displayed` counts.
+
+For intersections, every reported common ID must be present in both observed sets. If either set remains partial, call the result “at least N observed common accounts”; do not state that there are exactly N in the full lists or that no others exist. Avoid a false precision percentage based on displayed totals.
+
 If the user requests tracking or a report requiring historical comparison, save snapshots by default under the user's private application-data directory (`~/Library/Application Support/instagram-list-inspector/snapshots` on macOS, or the platform's corresponding user-data directory); honor a specified location instead. Do not ask the user to choose a path merely for convenience. Keep the directory outside any public Git repository and restrict access to the user when the filesystem supports it. Save only normalized records. Do not silently overwrite an earlier capture: include timestamp and source identity in the name. For a historical question without an older saved capture, report that a baseline is missing and offer to save today's capture; do not fabricate a past state.
 
 ## Exact analyses
