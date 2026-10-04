@@ -1,12 +1,13 @@
 # Instagram List Inspector
 
-An open-source **Codex skill** for comparing Instagram lists you can access in your own signed-in browser. It is an on-demand analysis workflow, **not** a standalone scraper, mobile app, official Instagram API client, or a way around private-account access controls.
+An open-source **Codex and Claude skill** for comparing Instagram lists accessible in your signed-in browser. It runs on demand and reports observed data and coverage limits.
 
 The skill can compare followers and following across accounts, find mutuals and non-follow-backs, intersect post/Reels likers with account audiences, spot repeat likers across posts, and compare dated captures. It joins accounts by platform ID where available and tells you when a list is incomplete. Results appear in chat by default; local JSON, CSV, or HTML reports are optional.
 
 ## Requirements
 
-- Codex with a browser tool that provides a signed-in Instagram tab and Chrome DevTools Protocol (CDP) access to that tab. The current workflow was developed for the Codex desktop in-app browser; other browser integrations may need adaptation.
+- Codex or Claude with an available signed-in browser/computer tool. Codex uses CDP only when the tool explicitly supports it; Claude defaults to visible UI observation.
+- For Claude Code, see [Chrome integration](https://code.claude.com/docs/en/chrome): launch with `claude --chrome` and check `/chrome`. Installing this skill does not activate browser tools.
 - An Instagram account with legitimate access to the specific lists you ask to inspect.
 - Your own judgment about applicable Instagram terms, privacy rules, and permissions. No password, session-cookie copy, ZIP export, or CLI setup is required by the skill.
 
@@ -18,7 +19,7 @@ Clone this repository into your personal Codex skills directory so that `SKILL.m
 git clone https://github.com/GreedyC/instagram-list-inspector.git "$HOME/.codex/skills/instagram-list-inspector"
 ```
 
-Restart or refresh Codex skill discovery if needed, then ask for a specific comparison, for example:
+For Claude Code, clone into `~/.claude/skills/instagram-list-inspector` instead. The shared entrypoint routes separately for each client. Restart or refresh skill discovery if needed, then ask for a specific comparison, for example:
 
 > `$instagram-list-inspector` Compare the accounts followed by @account_a and @account_b. Show the shared handles and tell me whether both lists were complete.
 
