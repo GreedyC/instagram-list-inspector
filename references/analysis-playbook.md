@@ -8,16 +8,32 @@ Keep one record per source list. Use this shape for working data and any user-re
 
 ```json
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "source_url": "https://www.instagram.com/example/",
   "kind": "followers",
   "captured_at_utc": "2026-09-24T12:00:00Z",
   "displayed_total": 114,
   "returned_total": null,
+  "displayed_total_source": "profile",
+  "returned_total_source": null,
   "pages_read": 11,
   "end_evidence": "no_next_cursor_and_has_more_false",
   "stop_reason": "normal_end",
   "coverage": "end_and_count_match",
+  "identity_mode": "stable_id",
+  "passes": [{
+    "captured_at_utc": "2026-09-24T12:00:00Z",
+    "pages_read": 11,
+    "observed_count": 114,
+    "displayed_total": 114,
+    "returned_total": null,
+    "displayed_total_source": "profile",
+    "returned_total_source": null,
+    "identity_mode": "stable_id",
+    "members": [{"id": "platform-id-if-observed", "username": "example_handle"}],
+    "end_evidence": "no_next_cursor_and_has_more_false",
+    "stop_reason": "normal_end"
+  }],
   "members": [{"id": "platform-id-if-observed", "username": "example_handle"}]
 }
 ```
@@ -25,22 +41,50 @@ Keep one record per source list. Use this shape for working data and any user-re
 `kind` is `followers`, `following`, or `likers`. For likers, use the post/Reels URL as `source_url`. `displayed_total`/`returned_total` may be null. `coverage` is one of:
 
 - `end_and_count_match`: explicit pagination end plus unique stable-ID count equal to a credible total.
-- `count_match_no_end_signal`: unique count matches a credible displayed/response total, but no explicit end signal exists.
-- `observed_end_no_total`: explicit end, no credible total for reconciliation.
-- `partial`: a cap, challenge, error, cursor loop, count mismatch, or known truncation stopped collection.
+- `count_match_no_end_signal`: stable-ID count matches a credible displayed/response total, but no explicit end signal exists.
+- `observed_end_no_total`: stable-ID capture with explicit end and no credible total for reconciliation; provisional identity overrides this to `partial`.
+- `partial`: a cap, challenge, error, cursor loop, count mismatch, known truncation or provisional identity prevents a strong completeness claim.
 - `unknown`: no sound completeness judgment.
 
 An Instagram count may change during collection or omit unavailable accounts. Even `end_and_count_match` is evidence for this capture, not a guarantee of a timeless complete list. Record whether a total came from the profile, post, or JSON response. Deduplicate by stable platform ID; if unavailable, normalize handles case-insensitively and mark matches `handle_only_uncertain`. Never infer a deleted account or a person's identity from a missing/renamed handle.
 
+`identity_mode` is `stable_id`, `handle_only_uncertain`, or `mixed_uncertain`.
+Use ID keys when observed, otherwise normalized-handle keys. Do not merge an
+ID-bearing row and a handle-only row solely because their handles match; record
+the uncertainty, and do not use mixed/provisional identity for strong absence
+claims. A matching handle count does not establish stable account identity.
+Handle-only or mixed captures remain `partial` even if their observed-key count
+matches the total; retain the end/count evidence and report the provisional
+match separately. Neither count-match coverage label applies to them.
+
+`passes` contains one initial capture and, only if permitted below, one
+consistency pass. Keep each pass's time, totals and their sources, identity mode,
+members with the handles seen in that pass, observed distinct-key count, page
+count, end evidence and stop reason separately. Total-source values are
+`profile`, `post`, `response`, or null when no total was observed. The abbreviated
+example shows one representative member; actual snapshots preserve every observed
+member and counts must match those records. Top-level `pages_read` is
+their sum; `members` is the deduplicated union, not the sum of pass counts.
+Top-level time/totals/total-source/end/stop fields describe the final pass, never
+a sum or a selected larger total; coverage describes the
+whole capture. Conflicting totals or uncertain cross-pass identity retain
+`partial`/`unknown`, not a forced count match. All conflicting totals remain in
+their original pass records. Legacy version-1 snapshots retain their original
+top-level summary and member records. Do not synthesize a pass, its membership,
+timestamps or total sources from that summary: pass history is unknown. Infer
+identity mode only from the saved members (all IDs, all handles, or mixed); do
+not promote a legacy coverage label when identity/provenance is uncertain.
+New snapshots use version 2; there is no automatic rewrite of legacy files.
+
 ### Count reconciliation
 
-Pagination exhaustion does not always reconcile with the profile's displayed count. A list can end with fewer distinct IDs because of overlapping pages, unavailable accounts, changing membership, or a platform response that omits entries; do not assume which cause applies.
+Pagination exhaustion does not always reconcile with the profile's displayed count. A list can end with fewer distinct identity keys (stable IDs when available, normalized handles otherwise) because of overlapping pages, unavailable accounts, changing membership, or a platform response that omits entries; do not assume which cause applies.
 
-When `has_more` is false (or the cursor ends) but distinct IDs are below a credible displayed/response total:
+When `has_more` is false (or the cursor ends) but the distinct-key count is below a credible displayed/response total, including handle-only captures:
 
 1. Record the mismatch and keep coverage as `partial`. Check whether the request, response, or page sequence explicitly signals a limit, hidden entries, errors, duplicate IDs, or a changing total. Do not infer that the unobserved accounts are a particular person.
 2. If the session is healthy and the observed GET already has a page-size parameter, at most **one** additional, sequential consistency pass may use a moderate larger page size accepted by the same endpoint. Keep the same origin, current signed-in tab, normal pacing, and stop conditions. Do not use repeated passes to force a count match, parallelize requests, or work around a limit/challenge. If there is no observed page-size parameter, do not invent an endpoint or parameter.
-3. Union the two passes by stable ID, keep the current handle from the later capture, and record both passes' page counts and end evidence. A second pass may find additional IDs without explaining the discrepancy. Mark `end_and_count_match` only when an explicit end signal and distinct-ID count genuinely match a credible total; otherwise retain `partial` and report `observed / displayed` counts.
+3. Union the two passes by stable ID, or by normalized handle when IDs are absent; handle-only matches remain provisional. Keep the later handle only for the same observed stable ID. Record both passes in `passes`, preserving members, page counts and end evidence. A second pass may find additional identity keys without explaining the discrepancy. Mark `end_and_count_match` only for stable-ID captures when an explicit end signal and distinct-ID count genuinely match a consistent credible total; otherwise retain `partial` and report `observed / displayed` counts. Do not infer identity across renames or fill in missing IDs.
 
 For intersections, every reported common ID must be present in both observed sets. If either set remains partial, call the result “at least N observed common accounts”; do not state that there are exactly N in the full lists or that no others exist. Avoid a false precision percentage based on displayed totals.
 
