@@ -30,6 +30,7 @@ The browser may request login, verification, or CDP approval. Complete those pro
 - The workflow observes Instagram's **unofficial web requests**, which can change or stop working. It does not claim Meta/Instagram affiliation or approval.
 - Meta says automated data collection without permission can violate its terms. Use only where you have appropriate rights and permission; respect platform limits and stop on challenges or rate limits. See [Meta's scraping guidance](https://www.facebook.com/help/463983701520800) and the [Instagram Terms of Use](https://help.instagram.com/581066165581870).
 - Private or unavailable lists are not bypassed. Missing results from partial captures are **not** proof that a person did not follow or like something.
+- Instagram may end pagination before the observed identity-key count (IDs, or normalized handles when IDs are unavailable) matches a profile total. The skill makes at most one bounded consistency pass and preserves each pass's evidence separately. Handle-only identity stays provisional even when counts match; unresolved mismatches remain partial.
 - Session headers stay in browser memory during a run. Never publish cookies, raw responses, screenshots containing private information, or generated reports. The repository contains instructions only, not account data.
 - Historical comparisons require an earlier user-requested local snapshot. The skill does not start background monitoring.
 
