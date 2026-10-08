@@ -1,9 +1,9 @@
 ---
 name: instagram-list-inspector
-description: Analyze user-accessible Instagram followers, following, and post/Reels likers in Codex's signed-in browser; compare accounts and posts, track dated changes, and produce evidence-aware reports.
+description: Analyze user-accessible Instagram followers, following, and post/Reels likers in a signed-in Codex or Claude browser; compare accounts and posts, track dated changes, and produce evidence-aware reports.
 ---
 
-# Instagram List Inspector (Codex)
+# Instagram List Inspector (Codex and Claude)
 
 Handle the analysis in this task, without the Followloom CLI, a ZIP export, pasted lists, or a copied session cookie. The user supplies only target handles/post URLs and the question. For operation definitions, the snapshot contract, and report rules, read [analysis-playbook.md](references/analysis-playbook.md) before analyzing or saving data.
 
@@ -33,9 +33,19 @@ Support all analytical features from the Followloom product plan when the necess
 
 Do not confuse supported *analysis* with guaranteed data access. Instagram may withhold a list, limit a response, change a private web endpoint, or challenge the session. Never fill unavailable data by guessing, and never claim a negative observation from a partial list.
 
+## Client routing
+
+Read the actual browser-tool documentation before collection. Skill installation does not grant a capability.
+- Codex: use the documented browser interface. Follow the CDP path below only if the tool explicitly exposes and permits session network inspection and same-origin requests. If it does not, use visible UI observation and report coverage limits.
+- Claude: use connected Claude in Chrome, Cowork browser, or computer-use tools. Check the current session's tools first; `claude --chrome` and `/chrome` are setup/status options for Claude Code. Default to visible UI and accessible page text. Do not assume Codex APIs, CDP, or network interception exist in Claude.
+- Visible UI path: read rows before each scroll, deduplicate observed handles, record displayed totals and stopping reasons. No change after scrolling does not prove completeness. Stop on challenges, access denials, rate limits or recycled rows. Use the same analysis and reporting contract below.
+- Only use a network path in either client when the current tool documentation explicitly permits it. Do not add external browser servers or enable integrations automatically.
+
+Claude capability references: [Chrome](https://code.claude.com/docs/en/chrome), [computer use](https://code.claude.com/docs/en/computer-use). Availability is checked at runtime.
+
 ## Collect with minimum user effort
 
-1. Resolve the requested targets from the user's message. Reuse a signed-in Instagram tab through the browser tool; ask only for missing handles/post URLs that cannot be inferred. The user handles login, verification, and any full-CDP approval. If browser/CDP access is unavailable, explain it; use the slower visible-UI fallback only if the user wants it.
+1. Resolve the requested targets from the user's message. Reuse a signed-in Instagram tab through the browser tool; ask only for missing handles/post URLs that cannot be inferred. The user handles login, verification, and any full-CDP approval. If browser/CDP access is unavailable, explain it; use visible UI observation when supported and describe its coverage limits.
 2. Follow the browser tool's initialization and CDP capability documentation. Observe network events around opening the requested list once in the normal UI. Identify the actual same-origin list request and response; never assume an endpoint from an older run. Read only the fields needed for ID/handle matching, displayed/returned totals, and pagination.
 3. If more pages are advertised, use the *same tab's existing session* for sequential, bounded, same-origin requests derived from that observed GET and its cursor. Keep necessary headers and tokens in memory only. Do not print, persist, export, or pass cookies, CSRF tokens, raw request URLs, or full network bodies to another service. Stop at a challenge, 429, access denial, cursor loop, malformed/empty page, or reasonable page cap; no bypass, proxy rotation, or aggressive retry.
 4. For each list record its profile/post URL, kind, UTC capture time, displayed or response total, distinct stable IDs and current handles, pages read, pagination-end evidence, access/stop reason, and coverage status. Prefer stable IDs for joins; a handle-only match is provisional. Reconcile count with the source total, but do not treat a matching count alone as proof of full coverage. If pagination ends short of a credible total, follow the bounded [count-reconciliation procedure](references/analysis-playbook.md#count-reconciliation); do not silently relabel the list complete.
