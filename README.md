@@ -2,7 +2,7 @@
 
 An open-source **Codex and Claude skill** for comparing Instagram lists accessible in your signed-in browser. It runs on demand and reports observed data and coverage limits.
 
-The skill can compare followers and following across accounts, find mutuals and non-follow-backs, intersect post/Reels likers with account audiences, spot repeat likers across posts, and compare dated captures. It joins accounts by platform ID where available and tells you when a list is incomplete. Results appear in chat by default; local JSON, CSV, or HTML reports are optional.
+The skill can compare followers and following across accounts, find mutuals and non-follow-backs, intersect post/Reels likers with account audiences, spot repeat likers across posts, compare dated captures, and analyze commenters alongside post likers and user-labelled content topics. It joins accounts by platform ID where available and tells you when a list is incomplete. Results appear in chat by default; local JSON, CSV, or HTML reports are optional.
 
 ## Requirements
 
@@ -44,3 +44,23 @@ Kurulum için yukarıdaki `git clone` komutunu kullan. Ardından örneğin şunu
 > `$instagram-list-inspector` @hesap_a ile @hesap_b'nin ortak takip ettiklerini bul; iki listenin de kapsamını belirt.
 
 Şifre, çerez, ZIP veya elle liste yapıştırman gerekmez. Codex tarayıcısı ve CDP erişimi gerekir. Bu, resmi Instagram API'si değildir; platform kurallarını ve kişilerin gizliliğini gözeterek kullan.
+
+
+## Creator analysis and clickable reports
+
+Ask the agent to compare posts by topic (for example, Coffee vs Coding), cross
+observed commenters with post likers/followers, or summarize questions in comments
+it can actually observe. The agent uses its available browser/computer tools; a
+separate agent, collector service or user-run CLI is not required.
+
+A Python 3.10+ standard-library helper supplies repeatable ID-based calculations
+and requested self-contained HTML reports. The report has post search, topic and
+capture-date filters, sorting and inline source evidence; it runs offline. Whole-
+report topic counts remain separate from post-table filters. Participant identities
+in membership lists are omitted from aggregate exports; requested source URLs and descriptive metadata remain. The agent must keep descriptive fields neutral for sharing. Reports support optional report-local pseudonyms or
+explicitly requested identified reports. No third-party Python packages are needed.
+
+See [creator-analysis.md](references/creator-analysis.md) for the normalized input,
+comment-scope rules and agent workflow. New features are verified with synthetic
+fixtures; that is not a claim that Instagram currently exposes every requested
+list or that live multi-account collection has been validated.

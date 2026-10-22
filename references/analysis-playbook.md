@@ -22,7 +22,7 @@ Keep one record per source list. Use this shape for working data and any user-re
 }
 ```
 
-`kind` is `followers`, `following`, or `likers`. For likers, use the post/Reels URL as `source_url`. `displayed_total`/`returned_total` may be null. `coverage` is one of:
+The legacy capture kinds are `followers`, `following`, and `likers`. For the new `commenters` kind, separate comment records from distinct authors and use the scoped extension in [creator-analysis.md](creator-analysis.md). For likers, use the post/Reels URL as `source_url`. `displayed_total`/`returned_total` may be null. `coverage` is one of:
 
 - `end_and_count_match`: explicit pagination end plus unique stable-ID count equal to a credible total.
 - `count_match_no_end_signal`: unique count matches a credible displayed/response total, but no explicit end signal exists.
@@ -66,3 +66,8 @@ Default in-chat report: question, observed result, relevant handles only if usef
 Private reports may include handles when the user requests them. A report intended for sharing defaults to aggregate counts and no raw handles/IDs. If pseudonyms are requested, use fresh per-report labels (e.g. `Person 001`) without embedding a reversible mapping or stable cross-report hash in the shared file. Keep any mapping local only if explicitly needed. Never put session data, raw request URLs, third-party account lists, or private report content in the skill, vault memory, git, or public links. Do not upload or publish a report unless specifically requested.
 
 Do not create a scheduled monitor from a request for historical analysis. A future scheduled check requires a separate explicit user request and must still respect browser/session availability and platform limits.
+
+
+## Creator-mode extensions
+
+For user-labelled content topics, commenters × post likers × audiences, observed comment themes and interactive HTML, read [creator-analysis.md](creator-analysis.md). Use the bundled helper for exact counts and export privacy. It accepts a versioned bundle around these captures; legacy snapshot files remain unchanged.
