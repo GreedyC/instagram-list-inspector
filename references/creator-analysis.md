@@ -17,6 +17,10 @@ collection capability. Do not ask the user to install/run a CLI or supply lists.
   controls in bounded steps. Match the author link, not an @mention inside a
   comment. Do not switch to hidden endpoints in a UI-only task. The existing
   optional network route applies only when the current tool explicitly permits it.
+- Recheck that the requested list dialog is still open after navigation or
+  scrolling. Read usernames from the visible author/profile link, excluding
+  verification badges or display names. Captions by the post owner are not
+  comment records; an unavailable comment control is not an empty comment list.
 - Read the post's liker list separately. Likes on an individual comment are not
   likes on the post. Followers/following are additional requested sources, not
   prerequisites for a simple post comparison.
