@@ -41,7 +41,12 @@ If text/replies are unavailable, say so instead of generating plausible themes.
 
 Python 3.10+ with the standard library is sufficient. Locate the helper relative
 to this installed skill. The following bundle wraps the existing capture format;
-it does not change the legacy single-capture snapshot format.
+its bundle version is independent of the version-2 single-capture snapshot
+contract in the main playbook. This helper accepts only the documented fields
+below: keep reconciliation pass history in the private snapshot and supply its
+resolved members, final timestamp/counts and conservative coverage here. Do not
+pass a version-2 snapshot directly or discard unresolved provenance to claim
+complete coverage.
 
 ```json
 {

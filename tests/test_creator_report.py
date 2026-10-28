@@ -261,6 +261,32 @@ class CreatorAnalysisTests(unittest.TestCase):
             with self.subTest(invalid=invalid), self.assertRaises(InputError):
                 timestamp(invalid)
 
+    def test_end_without_total_respects_identity_and_stop_evidence(self):
+        for change in ["handle_only", "interrupted", "total_present", "valid"]:
+            bundle = copy.deepcopy(self.bundle)
+            capture = bundle["captures"][2]
+            capture.update(
+                coverage="observed_end_no_total",
+                displayed_total=None,
+                returned_total=None,
+                end_evidence="visible_end",
+                stop_reason="normal_end",
+            )
+            if change == "handle_only":
+                capture["members"] = [{"username": "synthetic_ui_only"}]
+            elif change == "interrupted":
+                capture["stop_reason"] = "challenge"
+            elif change == "total_present":
+                capture["displayed_total"] = len(capture["members"])
+            with self.subTest(change=change):
+                normalized = next(
+                    c for c in analyze(bundle)["sources"] if c["key"] == capture["key"]
+                )
+                self.assertEqual(
+                    normalized["coverage"],
+                    "observed_end_no_total" if change == "valid" else "partial",
+                )
+
     def test_non_simultaneous_captures_are_labelled(self):
         self.bundle["captures"][0]["captured_at_utc"] = "2026-10-19T12:00:00Z"
         self.assertTrue(any("24 hours" in w for w in analyze(self.bundle)["warnings"]))

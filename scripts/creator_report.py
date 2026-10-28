@@ -311,13 +311,15 @@ def normalize(bundle):
             warnings.append(
                 f"{key}: count-match status needs a credible total and stable IDs."
             )
-        if coverage == "observed_end_no_total" and end in {
-            "not_observed",
-            "unknown",
-            "none",
-        }:
-            coverage = "unknown"
-            warnings.append(f"{key}: an observed end needs end evidence.")
+        if coverage == "observed_end_no_total":
+            if known != len(actors) or stop != "normal_end" or credible is not None:
+                coverage = "partial"
+                warnings.append(
+                    f"{key}: end-without-total status needs stable IDs, no total and a normal stop."
+                )
+            elif end in {"not_observed", "unknown", "none"}:
+                coverage = "unknown"
+                warnings.append(f"{key}: an observed end needs end evidence.")
         if kind == "commenters" and scope == "visible_subset":
             coverage = "partial"
         if kind == "commenters" and comment_total is not None and "comments" in raw:
