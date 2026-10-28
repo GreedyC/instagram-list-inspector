@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "title": "Synthetic creator analysis",
+  "question": "Which observed accounts participate across Coffee and Coding posts?",
+  "captures": [
+    {
+      "key": "a-likes",
+      "kind": "likers",
+      "source_url": "https://www.instagram.com/p/SYNTH_A/",
+      "captured_at_utc": "2026-10-22T12:00:00Z",
+      "coverage": "end_and_count_match",
+      "displayed_total": 4,
+      "end_evidence": "explicit_pagination_end",
+      "stop_reason": "normal_end",
+      "members": [
+        {
+          "id": "90000000001",
+          "username": "synthetic_one"
+        },
+        {
+          "id": "90000000002",
+          "username": "synthetic_two"
+        },
+        {
+          "username": "synthetic_ui_only"
+        },
+        {
+          "id": "90000000001",
+          "username": "synthetic_one"
+        }
+      ],
+      "topic": "Coffee"
+    },
+    {
+      "key": "a-comments",
+      "kind": "commenters",
+      "source_url": "https://www.instagram.com/p/SYNTH_A/",
+      "captured_at_utc": "2026-10-22T12:00:00Z",
+      "coverage": "partial",
+      "displayed_total": null,
+      "end_evidence": "explicit_pagination_end",
+      "stop_reason": "normal_end",
+      "members": [],
+      "topic": "Coffee",
+      "comment_scope": "top_level_and_replies",
+      "displayed_comment_total": 9,
+      "comments": [
+        {
+          "id": "synthetic_comment_1",
+          "author": {
+            "id": "90000000001",
+            "username": "synthetic_renamed"
+          },
+          "is_reply": false
+        },
+        {
+          "id": "synthetic_comment_2",
+          "author": {
+            "id": "90000000003",
+            "username": "synthetic_three"
+          },
+          "is_reply": true
+        },
+        {
+          "id": "synthetic_comment_2",
+          "author": {
+            "id": "90000000003",
+            "username": "synthetic_three"
+          },
+          "is_reply": true
+        },
+        {
+          "id": "synthetic_comment_3",
+          "author": {
+            "username": "synthetic_ui_only"
+          },
+          "is_reply": false
+        }
+      ]
+    },
+    {
+      "key": "b-likes",
+      "kind": "likers",
+      "source_url": "https://www.instagram.com/p/SYNTH_B/",
+      "captured_at_utc": "2026-10-22T13:00:00Z",
+      "coverage": "end_and_count_match",
+      "displayed_total": 2,
+      "end_evidence": "explicit_pagination_end",
+      "stop_reason": "normal_end",
+      "members": [
+        {
+          "id": "90000000001",
+          "username": "synthetic_one"
+        },
+        {
+          "id": "90000000004",
+          "username": "synthetic_four"
+        }
+      ],
+      "topic": "Coffee"
+    },
+    {
+      "key": "c-likes",
+      "kind": "likers",
+      "source_url": "https://www.instagram.com/p/SYNTH_C/",
+      "captured_at_utc": "2026-10-22T14:00:00Z",
+      "coverage": "end_and_count_match",
+      "displayed_total": 2,
+      "end_evidence": "explicit_pagination_end",
+      "stop_reason": "normal_end",
+      "members": [
+        {
+          "id": "90000000002",
+          "username": "synthetic_two"
+        },
+        {
+          "id": "90000000005",
+          "username": "synthetic_five"
+        }
+      ],
+      "topic": "Coding"
+    },
+    {
+      "key": "c-comments",
+      "kind": "commenters",
+      "source_url": "https://www.instagram.com/p/SYNTH_C/",
+      "captured_at_utc": "2026-10-22T14:10:00Z",
+      "coverage": "observed_end_no_total",
+      "displayed_total": null,
+      "end_evidence": "explicit_pagination_end",
+      "stop_reason": "normal_end",
+      "members": [
+        {
+          "id": "90000000006",
+          "username": "synthetic_two"
+        }
+      ],
+      "topic": "Coding",
+      "comment_scope": "top_level"
+    },
+    {
+      "key": "followers",
+      "kind": "followers",
+      "source_url": "https://www.instagram.com/synthetic_creator/",
+      "captured_at_utc": "2026-10-22T12:00:00Z",
+      "coverage": "end_and_count_match",
+      "displayed_total": 2,
+      "end_evidence": "explicit_pagination_end",
+      "stop_reason": "normal_end",
+      "members": [
+        {
+          "id": "90000000001",
+          "username": "synthetic_one"
+        },
+        {
+          "id": "90000000004",
+          "username": "synthetic_four"
+        }
+      ]
+    }
+  ],
+  "comment_themes": [
+    {
+      "label": "Questions about preparation (synthetic)",
+      "observed_count": 2,
+      "source_keys": [
+        "a-comments"
+      ]
+    }
+  ]
+}

@@ -1,4 +1,4 @@
 interface:
   display_name: "Instagram List Inspector"
-  short_description: "Compare Instagram audiences with coverage checks"
+  short_description: "Compare Instagram topics, comments and audiences"
   default_prompt: "Use $instagram-list-inspector to explain the available comparisons briefly and ask which account or post I want to analyze."

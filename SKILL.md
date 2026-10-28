@@ -1,6 +1,6 @@
 ---
 name: instagram-list-inspector
-description: Analyze user-accessible Instagram followers, following, and post/Reels likers in a signed-in Codex or Claude browser; compare accounts and posts, track dated changes, and produce evidence-aware reports.
+description: Analyze user-accessible Instagram followers, following, and post/Reels likers and commenters in a signed-in Codex or Claude browser; compare audiences and content topics, track dated changes, and create evidence-aware interactive reports.
 ---
 
 # Instagram List Inspector (Codex and Claude)
@@ -14,6 +14,7 @@ On an explicit invocation such as `$instagram-list-inspector`, give a short orie
 - Mutual following and non-follow-backs for one account.
 - Shared or distinct followers/following across accounts.
 - Overlap between post/Reels likers and account audiences; repeat likers across posts.
+- Compare user-labelled content topics and observed commenters × post likers × audiences.
 - Dated additions/removals when earlier captures exist.
 - In-chat findings by default, or a requested local HTML/CSV/JSON report.
 
@@ -29,6 +30,7 @@ Support all analytical features from the Followloom product plan when the necess
 - Two or more accounts: shared/unique followers or following, pairwise and three-way intersections, overlap with explicitly named denominators, and candidate audience bridges.
 - A post or Reel: observed likers ∩ any selected account's followers/following; observed likers outside those lists; multiple posts' repeat-liker and campaign-overlap analysis.
 - Dated captures: additions/removals between comparable snapshots, changes in intersections, and careful treatment of username changes or disappeared accounts.
+- Creator analyses: user-labelled post topics, distinct/repeat observed participants across posts, commenters × post likers × selected audiences, and common questions/themes when the user requests analysis of observed comment text. Read [creator-analysis.md](references/creator-analysis.md) for comment collection, exact counting and the deterministic helper.
 - Evidence-aware output: coverage and source for every set, partial-data sensitivity, concise in-chat findings, and user-requested local JSON/CSV/HTML reports with aggregate-only or pseudonymous sharing options.
 
 Do not confuse supported *analysis* with guaranteed data access. Instagram may withhold a list, limit a response, change a private web endpoint, or challenge the session. Never fill unavailable data by guessing, and never claim a negative observation from a partial list.
@@ -46,7 +48,7 @@ Claude capability references: [Chrome](https://code.claude.com/docs/en/chrome), 
 ## Collect with minimum user effort
 
 1. Resolve the requested targets from the user's message. Reuse a signed-in Instagram tab through the browser tool; ask only for missing handles/post URLs that cannot be inferred. The user handles login, verification, and any full-CDP approval. If browser/CDP access is unavailable, explain it; use visible UI observation when supported and describe its coverage limits.
-2. Follow the browser tool's initialization and CDP capability documentation. Observe network events around opening the requested list once in the normal UI. Identify the actual same-origin list request and response; never assume an endpoint from an older run. Read only the fields needed for ID/handle matching, displayed/returned totals, and pagination.
+2. For visible computer use, read each visible row before scrolling, use the normal list/reply controls, and retain source/scope/stop evidence; skip the network-only instructions in steps 2–3. For commenters, distinguish comment authors from mentions and post likes from comment likes; read [creator-analysis.md](references/creator-analysis.md). Only when the tool explicitly permits a network route, follow its initialization and CDP capability documentation. Observe network events around opening the requested list once in the normal UI. Identify the actual same-origin list request and response; never assume an endpoint from an older run. Read only the fields needed for ID/handle matching, displayed/returned totals, and pagination.
 3. If more pages are advertised, use the *same tab's existing session* for sequential, bounded, same-origin requests derived from that observed GET and its cursor. Keep necessary headers and tokens in memory only. Do not print, persist, export, or pass cookies, CSRF tokens, raw request URLs, or full network bodies to another service. Stop at a challenge, 429, access denial, cursor loop, malformed/empty page, or reasonable page cap; no bypass, proxy rotation, or aggressive retry.
 4. For each list record its profile/post URL, kind, UTC capture time, displayed or response total and its source, observed identity keys/current handles, pages read, pagination-end evidence, access/stop reason, and coverage status. Prefer stable IDs; without them use case-insensitive handles and mark identity provisional. If pagination ends short of a credible total, including handle-only captures, follow the bounded [count-reconciliation procedure](references/analysis-playbook.md#count-reconciliation). Preserve both passes separately in the version-2 snapshot contract. Neither a matching count alone nor provisional identity establishes full coverage.
 
@@ -57,3 +59,6 @@ Reinspect each list type's live request and response before relying on it. A suc
 Use [analysis-playbook.md](references/analysis-playbook.md) for exact set definitions, temporal conditions, partial-data language, report schema, and privacy defaults. Compute only from observed IDs/handles. Label every table/claim with capture times and coverage. Say “not observed in this capture” rather than “did not like,” “unfollowed,” or “has a relationship.” For a historical comparison, save dated local snapshots only when the user requests tracking or a report that requires them; tell the user the local path and do not put account lists in vault memory or a public repository.
 
 Return the answer in chat by default. Generate local HTML/CSV/JSON only when requested; default any shareable report to aggregate results, with identities included only when the user asks. No auto-publishing, scheduled monitoring, mobile app, or CLI is implied by this skill.
+
+
+For the selected creator features, keep collection in this agent/browser workflow and use the standard-library helper in [creator-analysis.md](references/creator-analysis.md) for repeatable calculations. It does not collect data or require a separate agent/service. A clickable HTML report is opt-in; its export defaults to aggregates, and filters clearly separate the post table from whole-report topic totals.
