@@ -84,6 +84,10 @@ it does not change the legacy single-capture snapshot format.
 }
 ```
 
+Use capture timestamps in `YYYY-MM-DDTHH:MM:SS[.ffffff]Z` format or with an
+explicit `±HH:MM` offset. Fractions may have one to six digits; finer precision is
+rejected rather than silently rounded. Timestamps are normalized to UTC.
+
 Use canonical HTTPS Instagram profile/post URLs without query strings, credentials
 or fragments. Keys must be unique. Within a capture, conflicting labels for the same ID must be normalized from
 source evidence or the ambiguous username omitted. Case differences and missing

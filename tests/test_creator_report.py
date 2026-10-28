@@ -243,6 +243,24 @@ class CreatorAnalysisTests(unittest.TestCase):
             timestamp("2026-10-22T15:00:00+03:00"), timestamp("2026-10-22T12:00:00Z")
         )
 
+    def test_timestamp_fraction_lengths_and_offset_rollover(self):
+        for digits in range(1, 7):
+            fraction = "123456"[:digits]
+            with self.subTest(digits=digits):
+                self.assertEqual(
+                    timestamp(f"2026-10-22T00:00:00.{fraction}+03:00"),
+                    f"2026-10-21T21:00:00.{fraction.ljust(6, '0')}Z",
+                )
+        for invalid in [
+            "2026-10-22T12:00:00.1234567Z",
+            "2026-10-22T12:00:00.Z",
+            "2026-02-30T12:00:00Z",
+            "2026-10-22T25:00:00Z",
+            "2026-10-22T12:00:00+24:00",
+        ]:
+            with self.subTest(invalid=invalid), self.assertRaises(InputError):
+                timestamp(invalid)
+
     def test_non_simultaneous_captures_are_labelled(self):
         self.bundle["captures"][0]["captured_at_utc"] = "2026-10-19T12:00:00Z"
         self.assertTrue(any("24 hours" in w for w in analyze(self.bundle)["warnings"]))

@@ -72,10 +72,22 @@ def count(value, label):
 
 
 def timestamp(value):
+    value = text(value, "capture timestamp", 64)
+    match = re.fullmatch(
+        r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d{1,6}))?(Z|[+-]\d{2}:\d{2})",
+        value,
+    )
+    require(
+        match is not None,
+        "capture timestamp must include seconds, a timezone and at most six fractional digits",
+    )
+    seconds, fraction, offset = match.groups()
+    # Python 3.10 accepts only three or six fractional digits. Normalize before
+    # parsing so every supported version preserves the same microsecond value.
+    normalized = seconds + ("." + fraction.ljust(6, "0") if fraction else "")
+    normalized += "+00:00" if offset == "Z" else offset
     try:
-        parsed = datetime.fromisoformat(
-            text(value, "capture timestamp", 64).replace("Z", "+00:00")
-        )
+        parsed = datetime.fromisoformat(normalized)
     except ValueError as exc:
         raise InputError("capture timestamp must be ISO 8601 with a timezone") from exc
     require(
