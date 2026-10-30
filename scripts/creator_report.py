@@ -489,6 +489,7 @@ def analyze(bundle, identity_mode="aggregate"):
         row = {
             "source_url": url,
             "topic": sources[0]["topic"],
+            "format": "reel" if "/reel/" in url else "post",
             "captured_at_utc": max(c["captured_at_utc"] for c in sources),
             "coverage": "limited_evidence"
             if any(c["coverage"] != "end_and_count_match" for c in sources)

@@ -335,6 +335,19 @@ class CreatorAnalysisTests(unittest.TestCase):
             if sys.platform != "win32":
                 self.assertEqual(report.stat().st_mode & 0o777, 0o600)
 
+    def test_post_and_reel_formats_are_classified_correctly(self):
+        model = analyze(self.bundle)
+        post_formats = [p["format"] for p in model["posts"]]
+        self.assertIn("post", post_formats)
+        reel_capture = copy.deepcopy(self.bundle["captures"][0])
+        reel_capture["key"] = "coffee_reel_likes"
+        reel_capture["source_url"] = "https://www.instagram.com/reel/Ctest123/"
+        self.bundle["captures"].append(reel_capture)
+        model_with_reel = analyze(self.bundle)
+        reel_posts = [p for p in model_with_reel["posts"] if p["format"] == "reel"]
+        self.assertEqual(len(reel_posts), 1)
+        self.assertEqual(reel_posts[0]["source_url"], "https://www.instagram.com/reel/Ctest123/")
+
 
 if __name__ == "__main__":
     unittest.main()
