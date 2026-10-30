@@ -1,6 +1,7 @@
 """Behavioral checks on synthetic observations, never live account data."""
 
 import copy
+import csv
 import json
 import subprocess
 import sys
@@ -8,7 +9,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.creator_report import InputError, analyze, render_report, timestamp
+from scripts.creator_report import (
+    InputError,
+    analyze,
+    render_csv,
+    render_report,
+    timestamp,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests/fixtures/creator-observations.json"
@@ -334,6 +341,77 @@ class CreatorAnalysisTests(unittest.TestCase):
             self.assertEqual(original, report.read_bytes())
             if sys.platform != "win32":
                 self.assertEqual(report.stat().st_mode & 0o777, 0o600)
+
+    def test_csv_export_in_aggregate_mode_omits_identities(self):
+        model = analyze(self.bundle, "aggregate")
+        text = render_csv(model)
+        rows = list(csv.reader(text.splitlines()))
+        self.assertGreaterEqual(len(rows), 2)
+        headers = rows[0]
+        self.assertEqual(
+            headers,
+            [
+                "topic",
+                "source_url",
+                "captured_at_utc",
+                "coverage",
+                "likers",
+                "commenters",
+                "both_matched_by_id",
+                "possible_handle_matches",
+                "like_not_observed_comment",
+                "comment_not_observed_like",
+                "known_accounts",
+                "handle_only_accounts",
+            ],
+        )
+        self.assertNotIn("accounts", headers)
+        self.assertNotIn("synthetic_one", text)
+        self.assertNotIn("90000000001", text)
+
+    def test_csv_export_in_pseudonymous_and_identified_modes(self):
+        pseudonymous_csv = render_csv(analyze(self.bundle, "pseudonymous"))
+        pseudo_rows = list(csv.reader(pseudonymous_csv.splitlines()))
+        self.assertIn("accounts", pseudo_rows[0])
+        self.assertTrue(any("Account " in cell for row in pseudo_rows[1:] for cell in row))
+        self.assertNotIn("synthetic_one", pseudonymous_csv)
+
+        identified_csv = render_csv(analyze(self.bundle, "identified"))
+        ident_rows = list(csv.reader(identified_csv.splitlines()))
+        self.assertIn("accounts", ident_rows[0])
+        self.assertIn("@synthetic_one", identified_csv)
+
+    def test_agent_helper_supports_csv_output_without_overwriting(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report_csv = Path(directory) / "report.csv"
+            command = [
+                sys.executable,
+                str(ROOT / "scripts/creator_report.py"),
+                "--input",
+                "-",
+                "--csv",
+                str(report_csv),
+            ]
+            result = subprocess.run(
+                command,
+                check=False,
+                input=json.dumps(self.bundle),
+                text=True,
+                capture_output=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue(report_csv.exists())
+            self.assertTrue(report_csv.read_text(encoding="utf-8").startswith("topic,source_url,"))
+
+            # Second run with same path must fail with code 2 without overwriting
+            result2 = subprocess.run(
+                command,
+                check=False,
+                input=json.dumps(self.bundle),
+                text=True,
+                capture_output=True,
+            )
+            self.assertEqual(result2.returncode, 2)
 
 
 if __name__ == "__main__":

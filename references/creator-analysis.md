@@ -125,7 +125,7 @@ python <skill-dir>/scripts/creator_report.py --input <private-input.json> --html
 ```
 
 No output option returns an aggregate JSON model for the agent's in-chat answer.
-`--html` and `--json` create a requested export. The helper never overwrites a
+`--html`, `--json` and `--csv` create a requested export. The helper never overwrites a
 previous file; choose a new timestamped name. New output files are user-only where
 supported. Default `--identity-mode aggregate` omits participant IDs and handles
 from membership lists in the **entire** export, including embedded HTML data. Requested source URLs and descriptive metadata remain visible. Use neutral titles, questions, source keys, topic/theme labels and stop notes for a shareable report: the helper cannot recognize or redact personal information in arbitrary prose. Do not put participant names, raw comment quotations or session material in these fields. Use `pseudonymous` for

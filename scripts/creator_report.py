@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import html
+import io
 import json
 import os
 import re
@@ -592,6 +594,53 @@ def analyze(bundle, identity_mode="aggregate"):
     }
 
 
+def render_csv(model):
+    """Render an export-safe CSV summary of observed posts and participation."""
+    output = io.StringIO()
+    writer = csv.writer(output, lineterminator="\n")
+    headers = [
+        "topic",
+        "source_url",
+        "captured_at_utc",
+        "coverage",
+        "likers",
+        "commenters",
+        "both_matched_by_id",
+        "possible_handle_matches",
+        "like_not_observed_comment",
+        "comment_not_observed_like",
+        "known_accounts",
+        "handle_only_accounts",
+    ]
+    if model["identity_mode"] != "aggregate":
+        headers.append("accounts")
+    writer.writerow(headers)
+    for post in model["posts"]:
+        both = post.get("both") or {}
+        row = [
+            post["topic"],
+            post["source_url"],
+            post["captured_at_utc"],
+            post["coverage"],
+            post["likers"] if post["likers"] is not None else "",
+            post["commenters"] if post["commenters"] is not None else "",
+            both.get("known_count", "") if post.get("both") is not None else "",
+            both.get("possible_handle_count", "") if post.get("both") is not None else "",
+            post["like_not_observed_comment"]
+            if post["like_not_observed_comment"] is not None
+            else "",
+            post["comment_not_observed_like"]
+            if post["comment_not_observed_like"] is not None
+            else "",
+            post["known_accounts"],
+            post["handle_only_accounts"],
+        ]
+        if model["identity_mode"] != "aggregate":
+            row.append("; ".join(post.get("accounts", [])))
+        writer.writerow(row)
+    return output.getvalue()
+
+
 def render_report(model, language="en"):
     """Embed only the already-sanitized export model, with no network resources."""
     require(language in {"en", "tr"}, "report language must be en or tr")
@@ -631,6 +680,7 @@ def main():
     )
     parser.add_argument("--html", help="create a requested self-contained report")
     parser.add_argument("--json", help="create a requested export-safe JSON model")
+    parser.add_argument("--csv", help="create a requested export-safe CSV model")
     parser.add_argument(
         "--identity-mode",
         choices=["aggregate", "pseudonymous", "identified"],
@@ -645,10 +695,14 @@ def main():
             else Path(args.input).expanduser().read_text(encoding="utf-8")
         )
         model = analyze(json.loads(raw), args.identity_mode)
-        outputs = [Path(p).expanduser().resolve() for p in [args.html, args.json] if p]
+        outputs = [
+            Path(p).expanduser().resolve()
+            for p in [args.html, args.json, args.csv]
+            if p
+        ]
         require(
             len(outputs) == len(set(outputs)),
-            "HTML and JSON need different output paths",
+            "HTML, JSON and CSV need different output paths",
         )
         require(
             not any(p.exists() for p in outputs),
@@ -658,7 +712,9 @@ def main():
             write_new(args.html, render_report(model, args.language))
         if args.json:
             write_new(args.json, json.dumps(model, ensure_ascii=False, indent=2) + "\n")
-        if not args.html and not args.json:
+        if args.csv:
+            write_new(args.csv, render_csv(model))
+        if not args.html and not args.json and not args.csv:
             print(json.dumps(model, ensure_ascii=False, indent=2))
     except (InputError, OSError, json.JSONDecodeError) as exc:
         # Never echo raw input or unknown field names (which may contain session material).
