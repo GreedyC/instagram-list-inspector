@@ -575,6 +575,66 @@ def analyze(bundle, identity_mode="aggregate"):
                     **comparison(topic_members[first], topic_members[second]),
                 }
             )
+    post_likers_by_url = {
+        url: (sources.get("likers")["actors"] if "likers" in sources else {})
+        for url, sources in ((u, {c["kind"]: c for c in s}) for u, s in posts.items())
+    }
+    post_commenters_by_url = {
+        url: (sources.get("commenters")["actors"] if "commenters" in sources else {})
+        for url, sources in ((u, {c["kind"]: c for c in s}) for u, s in posts.items())
+    }
+    engager_stats = defaultdict(
+        lambda: {"liked": 0, "commented": 0, "both": 0, "posts": 0}
+    )
+    for url in posts:
+        likers_set = set(post_likers_by_url[url])
+        commenters_set = set(post_commenters_by_url[url])
+        for k in likers_set | commenters_set:
+            is_like = k in likers_set
+            is_comment = k in commenters_set
+            engager_stats[k]["posts"] += 1
+            if is_like:
+                engager_stats[k]["liked"] += 1
+            if is_comment:
+                engager_stats[k]["commented"] += 1
+            if is_like and is_comment:
+                engager_stats[k]["both"] += 1
+
+    multi_post_count = sum(
+        s["posts"] >= 2 for k, s in engager_stats.items() if k.startswith("id:")
+    )
+    repeat_both_count = sum(
+        s["both"] >= 2 for k, s in engager_stats.items() if k.startswith("id:")
+    )
+    all_known_count = sum(k.startswith("id:") for k in engager_stats)
+
+    loyalty = {
+        "multi_post_accounts": multi_post_count,
+        "multi_post_both_accounts": repeat_both_count,
+        "total_active_accounts": all_known_count,
+        "engagers": [],
+    }
+    if identity_mode != "aggregate":
+        ranked = sorted(
+            [k for k in engager_stats if engager_stats[k]["posts"] >= 2],
+            key=lambda k: (
+                engager_stats[k]["both"],
+                engager_stats[k]["posts"],
+                engager_stats[k]["commented"],
+                engager_stats[k]["liked"],
+            ),
+            reverse=True,
+        )
+        loyalty["engagers"] = [
+            {
+                "label": labels([k])[0],
+                "posts": engager_stats[k]["posts"],
+                "liked": engager_stats[k]["liked"],
+                "commented": engager_stats[k]["commented"],
+                "both": engager_stats[k]["both"],
+            }
+            for k in ranked
+        ]
     return {
         "schema_version": 1,
         "title": title,
@@ -587,6 +647,7 @@ def analyze(bundle, identity_mode="aggregate"):
         "posts": rows,
         "topics": topic_rows,
         "topic_overlap": topic_overlap,
+        "loyalty": loyalty,
         "comment_themes": themes,
         "sources": [{k: v for k, v in c.items() if k != "actors"} for c in captures],
     }

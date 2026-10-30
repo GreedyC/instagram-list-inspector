@@ -335,6 +335,25 @@ class CreatorAnalysisTests(unittest.TestCase):
             if sys.platform != "win32":
                 self.assertEqual(report.stat().st_mode & 0o777, 0o600)
 
+    def test_loyalty_metrics_in_aggregate_mode(self):
+        model = analyze(self.bundle, "aggregate")
+        self.assertIn("loyalty", model)
+        loyalty = model["loyalty"]
+        self.assertGreaterEqual(loyalty["total_active_accounts"], 1)
+        self.assertGreaterEqual(loyalty["multi_post_accounts"], 1)
+        self.assertEqual(loyalty["engagers"], [])
+
+    def test_loyalty_metrics_in_identified_mode_ranks_engagers(self):
+        model = analyze(self.bundle, "identified")
+        loyalty = model["loyalty"]
+        self.assertIn("engagers", loyalty)
+        if loyalty["engagers"]:
+            top = loyalty["engagers"][0]
+            self.assertIn("label", top)
+            self.assertIn("posts", top)
+            self.assertGreaterEqual(top["posts"], 2)
+            self.assertTrue(top["label"].startswith("@") or top["label"].startswith("ID "))
+
 
 if __name__ == "__main__":
     unittest.main()
