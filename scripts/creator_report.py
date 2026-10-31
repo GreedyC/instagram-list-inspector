@@ -491,6 +491,7 @@ def analyze(bundle, identity_mode="aggregate"):
         row = {
             "source_url": url,
             "topic": sources[0]["topic"],
+            "format": "reel" if "/reel/" in url else "post",
             "captured_at_utc": max(c["captured_at_utc"] for c in sources),
             "coverage": "limited_evidence"
             if any(c["coverage"] != "end_and_count_match" for c in sources)
@@ -600,6 +601,7 @@ def render_csv(model):
     writer = csv.writer(output, lineterminator="\n")
     headers = [
         "topic",
+        "format",
         "source_url",
         "captured_at_utc",
         "coverage",
@@ -619,6 +621,7 @@ def render_csv(model):
         both = post.get("both") or {}
         row = [
             post["topic"],
+            post.get("format", "post"),
             post["source_url"],
             post["captured_at_utc"],
             post["coverage"],
